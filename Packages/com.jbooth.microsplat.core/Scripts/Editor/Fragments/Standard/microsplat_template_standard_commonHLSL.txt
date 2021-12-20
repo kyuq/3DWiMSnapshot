@@ -1,0 +1,390 @@
+// If your looking in here and thinking WTF, yeah, I know. These are taken from the SRPs, to allow us to use the same
+// texturing library they use. However, since they are not included in the standard pipeline by default, there is no
+// way to include them in and they have to be inlined, since someone could copy this shader onto another machine without
+// MicroSplat installed. Unfortunate, but I'd rather do this and have a nice library for texture sampling instead
+// of the patchy one Unity provides being inlined/emulated in HDRP/URP. Strangely, PSSL and XBoxOne libraries are not
+// included in the standard SRP code, but they are in tons of Unity own projects on the web, so I grabbed them from there.
+
+
+#if defined(SHADER_API_XBOXONE)
+	
+	// Initialize arbitrary structure with zero values.
+	// Do not exist on some platform, in this case we need to have a standard name that call a function that will initialize all parameters to 0
+	#define ZERO_INITIALIZE(type, name) name = (type)0;
+	#define ZERO_INITIALIZE_ARRAY(type, name, arraySize) { for (int arrayIndex = 0; arrayIndex < arraySize; arrayIndex++) { name[arrayIndex] = (type)0; } }
+
+	// Texture util abstraction
+
+	#define CALCULATE_TEXTURE2D_LOD(textureName, samplerName, coord2) textureName.CalculateLevelOfDetail(samplerName, coord2)
+
+	// Texture abstraction
+
+	#define TEXTURE2D(textureName)                Texture2D textureName
+	#define TEXTURE2D_ARRAY(textureName)          Texture2DArray textureName
+
+	#define TEXTURE2D_FLOAT(textureName)          TEXTURE2D(textureName)
+	#define TEXTURE2D_ARRAY_FLOAT(textureName)    TEXTURE2D_ARRAY(textureName)
+
+	#define TEXTURE2D_HALF(textureName)           TEXTURE2D(textureName)
+	#define TEXTURE2D_ARRAY_HALF(textureName)     TEXTURE2D_ARRAY(textureName)
+
+
+	#define SAMPLER(samplerName)                  SamplerState samplerName
+	#define SAMPLER_CMP(samplerName)              SamplerComparisonState samplerName
+
+	
+
+	#define SAMPLE_TEXTURE2D(textureName, samplerName, coord2)                               textureName.Sample(samplerName, coord2)
+	#define SAMPLE_TEXTURE2D_LOD(textureName, samplerName, coord2, lod)                      textureName.SampleLevel(samplerName, coord2, lod)
+	#define SAMPLE_TEXTURE2D_BIAS(textureName, samplerName, coord2, bias)                    textureName.SampleBias(samplerName, coord2, bias)
+	#define SAMPLE_TEXTURE2D_GRAD(textureName, samplerName, coord2, dpdx, dpdy)              textureName.SampleGrad(samplerName, coord2, dpdx, dpdy)
+	#define SAMPLE_TEXTURE2D_ARRAY(textureName, samplerName, coord2, index)                  textureName.Sample(samplerName, float3(coord2, index))
+	#define SAMPLE_TEXTURE2D_ARRAY_LOD(textureName, samplerName, coord2, index, lod)         textureName.SampleLevel(samplerName, float3(coord2, index), lod)
+	#define SAMPLE_TEXTURE2D_ARRAY_BIAS(textureName, samplerName, coord2, index, bias)       textureName.SampleBias(samplerName, float3(coord2, index), bias)
+	#define SAMPLE_TEXTURE2D_ARRAY_GRAD(textureName, samplerName, coord2, index, dpdx, dpdy) textureName.SampleGrad(samplerName, float3(coord2, index), dpdx, dpdy)
+
+
+#elif defined(SHADER_API_PSSL)
+
+	// Initialize arbitrary structure with zero values.
+	// Do not exist on some platform, in this case we need to have a standard name that call a function that will initialize all parameters to 0
+	#define ZERO_INITIALIZE(type, name) name = (type)0;
+	#define ZERO_INITIALIZE_ARRAY(type, name, arraySize) { for (int arrayIndex = 0; arrayIndex < arraySize; arrayIndex++) { name[arrayIndex] = (type)0; } }
+
+	// Texture util abstraction
+
+	#define CALCULATE_TEXTURE2D_LOD(textureName, samplerName, coord2) textureName.GetLOD(samplerName, coord2)
+
+	// Texture abstraction
+
+	#define TEXTURE2D(textureName)                Texture2D textureName
+	#define TEXTURE2D_ARRAY(textureName)          Texture2DArray textureName
+
+	#define TEXTURE2D_FLOAT(textureName)          TEXTURE2D(textureName)
+	#define TEXTURE2D_ARRAY_FLOAT(textureName)    TEXTURE2D_ARRAY(textureName)
+
+	#define TEXTURE2D_HALF(textureName)           TEXTURE2D(textureName)
+	#define TEXTURE2D_ARRAY_HALF(textureName)     TEXTURE2D_ARRAY(textureName)
+
+
+	#define SAMPLER(samplerName)                  SamplerState samplerName
+	#define SAMPLER_CMP(samplerName)              SamplerComparisonState samplerName
+
+	#define SAMPLE_TEXTURE2D(textureName, samplerName, coord2)                               textureName.Sample(samplerName, coord2)
+	#define SAMPLE_TEXTURE2D_LOD(textureName, samplerName, coord2, lod)                      textureName.SampleLevel(samplerName, coord2, lod)
+	#define SAMPLE_TEXTURE2D_BIAS(textureName, samplerName, coord2, bias)                    textureName.SampleBias(samplerName, coord2, bias)
+	#define SAMPLE_TEXTURE2D_GRAD(textureName, samplerName, coord2, dpdx, dpdy)              textureName.SampleGrad(samplerName, coord2, dpdx, dpdy)
+	#define SAMPLE_TEXTURE2D_ARRAY(textureName, samplerName, coord2, index)                  textureName.Sample(samplerName, float3(coord2, index))
+	#define SAMPLE_TEXTURE2D_ARRAY_LOD(textureName, samplerName, coord2, index, lod)         textureName.SampleLevel(samplerName, float3(coord2, index), lod)
+	#define SAMPLE_TEXTURE2D_ARRAY_BIAS(textureName, samplerName, coord2, index, bias)       textureName.SampleBias(samplerName, float3(coord2, index), bias)
+	#define SAMPLE_TEXTURE2D_ARRAY_GRAD(textureName, samplerName, coord2, index, dpdx, dpdy) textureName.SampleGrad(samplerName, float3(coord2, index), dpdx, dpdy)
+
+
+#elif defined(SHADER_API_D3D11)
+
+	// Initialize arbitrary structure with zero values.
+	// Do not exist on some platform, in this case we need to have a standard name that call a function that will initialize all parameters to 0
+	#define ZERO_INITIALIZE(type, name) name = (type)0;
+	#define ZERO_INITIALIZE_ARRAY(type, name, arraySize) { for (int arrayIndex = 0; arrayIndex < arraySize; arrayIndex++) { name[arrayIndex] = (type)0; } }
+
+	// Texture util abstraction
+
+	#define CALCULATE_TEXTURE2D_LOD(textureName, samplerName, coord2) textureName.CalculateLevelOfDetail(samplerName, coord2)
+
+	// Texture abstraction
+
+	#define TEXTURE2D(textureName)                Texture2D textureName
+	#define TEXTURE2D_ARRAY(textureName)          Texture2DArray textureName
+
+	#define TEXTURE2D_FLOAT(textureName)          TEXTURE2D(textureName)
+	#define TEXTURE2D_ARRAY_FLOAT(textureName)    TEXTURE2D_ARRAY(textureName)
+
+	#define TEXTURE2D_HALF(textureName)           TEXTURE2D(textureName)
+	#define TEXTURE2D_ARRAY_HALF(textureName)     TEXTURE2D_ARRAY(textureName)
+
+	#define SAMPLER(samplerName)                  SamplerState samplerName
+	#define SAMPLER_CMP(samplerName)              SamplerComparisonState samplerName
+
+	#define SAMPLE_TEXTURE2D(textureName, samplerName, coord2)                               textureName.Sample(samplerName, coord2)
+	#define SAMPLE_TEXTURE2D_LOD(textureName, samplerName, coord2, lod)                      textureName.SampleLevel(samplerName, coord2, lod)
+	#define SAMPLE_TEXTURE2D_BIAS(textureName, samplerName, coord2, bias)                    textureName.SampleBias(samplerName, coord2, bias)
+	#define SAMPLE_TEXTURE2D_GRAD(textureName, samplerName, coord2, dpdx, dpdy)              textureName.SampleGrad(samplerName, coord2, dpdx, dpdy)
+	#define SAMPLE_TEXTURE2D_ARRAY(textureName, samplerName, coord2, index)                  textureName.Sample(samplerName, float3(coord2, index))
+	#define SAMPLE_TEXTURE2D_ARRAY_LOD(textureName, samplerName, coord2, index, lod)         textureName.SampleLevel(samplerName, float3(coord2, index), lod)
+	#define SAMPLE_TEXTURE2D_ARRAY_BIAS(textureName, samplerName, coord2, index, bias)       textureName.SampleBias(samplerName, float3(coord2, index), bias)
+	#define SAMPLE_TEXTURE2D_ARRAY_GRAD(textureName, samplerName, coord2, index, dpdx, dpdy) textureName.SampleGrad(samplerName, float3(coord2, index), dpdx, dpdy)
+
+#elif defined(SHADER_API_METAL)
+
+	// Initialize arbitrary structure with zero values.
+	// Do not exist on some platform, in this case we need to have a standard name that call a function that will initialize all parameters to 0
+	#define ZERO_INITIALIZE(type, name) name = (type)0;
+	#define ZERO_INITIALIZE_ARRAY(type, name, arraySize) { for (int arrayIndex = 0; arrayIndex < arraySize; arrayIndex++) { name[arrayIndex] = (type)0; } }
+
+	// Texture util abstraction
+
+	#define CALCULATE_TEXTURE2D_LOD(textureName, samplerName, coord2) textureName.CalculateLevelOfDetail(samplerName, coord2)
+
+	// Texture abstraction
+
+	#define TEXTURE2D(textureName)                Texture2D textureName
+	#define TEXTURE2D_ARRAY(textureName)          Texture2DArray textureName
+
+	#define TEXTURE2D_FLOAT(textureName)          Texture2D_float textureName
+	#define TEXTURE2D_ARRAY_FLOAT(textureName)    Texture2DArray textureName    // no support to _float on Array, it's being added
+
+	#define TEXTURE2D_HALF(textureName)           Texture2D_half textureName
+	#define TEXTURE2D_ARRAY_HALF(textureName)     Texture2DArray textureName    // no support to _float on Array, it's being added
+
+	#define SAMPLER(samplerName)                  SamplerState samplerName
+	#define SAMPLER_CMP(samplerName)              SamplerComparisonState samplerName
+
+	#define SAMPLE_TEXTURE2D(textureName, samplerName, coord2)                               textureName.Sample(samplerName, coord2)
+	#define SAMPLE_TEXTURE2D_LOD(textureName, samplerName, coord2, lod)                      textureName.SampleLevel(samplerName, coord2, lod)
+	#define SAMPLE_TEXTURE2D_BIAS(textureName, samplerName, coord2, bias)                    textureName.SampleBias(samplerName, coord2, bias)
+	#define SAMPLE_TEXTURE2D_GRAD(textureName, samplerName, coord2, dpdx, dpdy)              textureName.SampleGrad(samplerName, coord2, dpdx, dpdy)
+	#define SAMPLE_TEXTURE2D_ARRAY(textureName, samplerName, coord2, index)                  textureName.Sample(samplerName, float3(coord2, index))
+	#define SAMPLE_TEXTURE2D_ARRAY_LOD(textureName, samplerName, coord2, index, lod)         textureName.SampleLevel(samplerName, float3(coord2, index), lod)
+	#define SAMPLE_TEXTURE2D_ARRAY_BIAS(textureName, samplerName, coord2, index, bias)       textureName.SampleBias(samplerName, float3(coord2, index), bias)
+	#define SAMPLE_TEXTURE2D_ARRAY_GRAD(textureName, samplerName, coord2, index, dpdx, dpdy) textureName.SampleGrad(samplerName, float3(coord2, index), dpdx, dpdy)
+
+#elif defined(SHADER_API_VULKAN)
+// This file assume SHADER_API_VULKAN is defined
+	// TODO: This is a straight copy from D3D11.hlsl. Go through all this stuff and adjust where needed.
+
+
+	// Initialize arbitrary structure with zero values.
+	// Do not exist on some platform, in this case we need to have a standard name that call a function that will initialize all parameters to 0
+	#define ZERO_INITIALIZE(type, name) name = (type)0;
+	#define ZERO_INITIALIZE_ARRAY(type, name, arraySize) { for (int arrayIndex = 0; arrayIndex < arraySize; arrayIndex++) { name[arrayIndex] = (type)0; } }
+
+	// Texture util abstraction
+
+	#define CALCULATE_TEXTURE2D_LOD(textureName, samplerName, coord2) textureName.CalculateLevelOfDetail(samplerName, coord2)
+
+	// Texture abstraction
+
+	#define TEXTURE2D(textureName)                Texture2D textureName
+	#define TEXTURE2D_ARRAY(textureName)          Texture2DArray textureName
+
+	#define TEXTURE2D_FLOAT(textureName)          Texture2D_float textureName
+	#define TEXTURE2D_ARRAY_FLOAT(textureName)    Texture2DArray textureName    // no support to _float on Array, it's being added
+
+	#define TEXTURE2D_HALF(textureName)           Texture2D_half textureName
+	#define TEXTURE2D_ARRAY_HALF(textureName)     Texture2DArray textureName    // no support to _float on Array, it's being added
+
+	#define SAMPLER(samplerName)                  SamplerState samplerName
+	#define SAMPLER_CMP(samplerName)              SamplerComparisonState samplerName
+
+	#define SAMPLE_TEXTURE2D(textureName, samplerName, coord2)                               textureName.Sample(samplerName, coord2)
+	#define SAMPLE_TEXTURE2D_LOD(textureName, samplerName, coord2, lod)                      textureName.SampleLevel(samplerName, coord2, lod)
+	#define SAMPLE_TEXTURE2D_BIAS(textureName, samplerName, coord2, bias)                    textureName.SampleBias(samplerName, coord2, bias)
+	#define SAMPLE_TEXTURE2D_GRAD(textureName, samplerName, coord2, dpdx, dpdy)              textureName.SampleGrad(samplerName, coord2, dpdx, dpdy)
+	#define SAMPLE_TEXTURE2D_ARRAY(textureName, samplerName, coord2, index)                  textureName.Sample(samplerName, float3(coord2, index))
+	#define SAMPLE_TEXTURE2D_ARRAY_LOD(textureName, samplerName, coord2, index, lod)         textureName.SampleLevel(samplerName, float3(coord2, index), lod)
+	#define SAMPLE_TEXTURE2D_ARRAY_BIAS(textureName, samplerName, coord2, index, bias)       textureName.SampleBias(samplerName, float3(coord2, index), bias)
+	#define SAMPLE_TEXTURE2D_ARRAY_GRAD(textureName, samplerName, coord2, index, dpdx, dpdy) textureName.SampleGrad(samplerName, float3(coord2, index), dpdx, dpdy)
+
+#elif defined(SHADER_API_SWITCH)
+	// This file assume SHADER_API_SWITCH is defined
+
+	// Initialize arbitrary structure with zero values.
+	// Do not exist on some platform, in this case we need to have a standard name that call a function that will initialize all parameters to 0
+	#define ZERO_INITIALIZE(type, name) name = (type)0;
+	#define ZERO_INITIALIZE_ARRAY(type, name, arraySize) { for (int arrayIndex = 0; arrayIndex < arraySize; arrayIndex++) { name[arrayIndex] = (type)0; } }
+
+	// Texture util abstraction
+
+	#define CALCULATE_TEXTURE2D_LOD(textureName, samplerName, coord2) textureName.CalculateLevelOfDetail(samplerName, coord2)
+
+	// Texture abstraction
+
+	#define TEXTURE2D(textureName)                Texture2D textureName
+	#define TEXTURE2D_ARRAY(textureName)          Texture2DArray textureName
+
+	#define TEXTURE2D_FLOAT(textureName)          Texture2D_float textureName
+	#define TEXTURE2D_ARRAY_FLOAT(textureName)    Texture2DArray textureName    // no support to _float on Array, it's being added
+
+	#define TEXTURE2D_HALF(textureName)           Texture2D_half textureName
+	#define TEXTURE2D_ARRAY_HALF(textureName)     Texture2DArray textureName    // no support to _float on Array, it's being added
+
+	#define SAMPLER(samplerName)                  SamplerState samplerName
+	#define SAMPLER_CMP(samplerName)              SamplerComparisonState samplerName
+
+	#define SAMPLE_TEXTURE2D(textureName, samplerName, coord2)                               textureName.Sample(samplerName, coord2)
+	#define SAMPLE_TEXTURE2D_LOD(textureName, samplerName, coord2, lod)                      textureName.SampleLevel(samplerName, coord2, lod)
+	#define SAMPLE_TEXTURE2D_BIAS(textureName, samplerName, coord2, bias)                    textureName.SampleBias(samplerName, coord2, bias)
+	#define SAMPLE_TEXTURE2D_GRAD(textureName, samplerName, coord2, dpdx, dpdy)              textureName.SampleGrad(samplerName, coord2, dpdx, dpdy)
+	#define SAMPLE_TEXTURE2D_ARRAY(textureName, samplerName, coord2, index)                  textureName.Sample(samplerName, float3(coord2, index))
+	#define SAMPLE_TEXTURE2D_ARRAY_LOD(textureName, samplerName, coord2, index, lod)         textureName.SampleLevel(samplerName, float3(coord2, index), lod)
+	#define SAMPLE_TEXTURE2D_ARRAY_BIAS(textureName, samplerName, coord2, index, bias)       textureName.SampleBias(samplerName, float3(coord2, index), bias)
+	#define SAMPLE_TEXTURE2D_ARRAY_GRAD(textureName, samplerName, coord2, index, dpdx, dpdy) textureName.SampleGrad(samplerName, float3(coord2, index), dpdx, dpdy)
+
+#elif defined(SHADER_API_GLCORE)
+
+	// OpenGL 4.1 SM 5.0 https://docs.unity3d.com/Manual/SL-ShaderCompileTargets.html
+	#if (SHADER_TARGET >= 46)
+	#define OPENGL4_1_SM5 1
+	#else
+	#define OPENGL4_1_SM5 0
+	#endif
+
+	// Initialize arbitrary structure with zero values.
+	// Do not exist on some platform, in this case we need to have a standard name that call a function that will initialize all parameters to 0
+	#define ZERO_INITIALIZE(type, name) name = (type)0;
+	#define ZERO_INITIALIZE_ARRAY(type, name, arraySize) { for (int arrayIndex = 0; arrayIndex < arraySize; arrayIndex++) { name[arrayIndex] = (type)0; } }
+
+	// Texture util abstraction
+
+	#define CALCULATE_TEXTURE2D_LOD(textureName, samplerName, coord2) textureName.CalculateLevelOfDetail(samplerName, coord2)
+
+	// Texture abstraction
+
+	#define TEXTURE2D(textureName)                  Texture2D textureName
+	#define TEXTURE2D_ARRAY(textureName)            Texture2DArray textureName
+
+	#define TEXTURE2D_FLOAT(textureName)            TEXTURE2D(textureName)
+	#define TEXTURE2D_ARRAY_FLOAT(textureName)      TEXTURE2D_ARRAY(textureName)
+
+	#define TEXTURE2D_HALF(textureName)             TEXTURE2D(textureName)
+	#define TEXTURE2D_ARRAY_HALF(textureName)       TEXTURE2D_ARRAY(textureName)
+
+
+	#define SAMPLER(samplerName)                    SamplerState samplerName
+	#define SAMPLER_CMP(samplerName)                SamplerComparisonState samplerName
+
+	#define SAMPLE_TEXTURE2D(textureName, samplerName, coord2)                               textureName.Sample(samplerName, coord2)
+	#define SAMPLE_TEXTURE2D_LOD(textureName, samplerName, coord2, lod)                      textureName.SampleLevel(samplerName, coord2, lod)
+	#define SAMPLE_TEXTURE2D_BIAS(textureName, samplerName, coord2, bias)                    textureName.SampleBias(samplerName, coord2, bias)
+	#define SAMPLE_TEXTURE2D_GRAD(textureName, samplerName, coord2, ddx, ddy)                textureName.SampleGrad(samplerName, coord2, ddx, ddy)
+	#define SAMPLE_TEXTURE2D_ARRAY(textureName, samplerName, coord2, index)                  textureName.Sample(samplerName, float3(coord2, index))
+	#define SAMPLE_TEXTURE2D_ARRAY_LOD(textureName, samplerName, coord2, index, lod)         textureName.SampleLevel(samplerName, float3(coord2, index), lod)
+	#define SAMPLE_TEXTURE2D_ARRAY_BIAS(textureName, samplerName, coord2, index, bias)       textureName.SampleBias(samplerName, float3(coord2, index), bias)
+	#define SAMPLE_TEXTURE2D_ARRAY_GRAD(textureName, samplerName, coord2, index, dpdx, dpdy) textureName.SampleGrad(samplerName, float3(coord2, index), dpdx, dpdy)
+
+	#elif defined(SHADER_API_GLES3)
+
+	// GLES 3.1 + AEP shader feature https://docs.unity3d.com/Manual/SL-ShaderCompileTargets.html
+	#if (SHADER_TARGET >= 40)
+	#define GLES3_1_AEP 1
+	#else
+	#define GLES3_1_AEP 0
+	#endif
+
+	// Initialize arbitrary structure with zero values.
+	// Do not exist on some platform, in this case we need to have a standard name that call a function that will initialize all parameters to 0
+	#define ZERO_INITIALIZE(type, name) name = (type)0;
+	#define ZERO_INITIALIZE_ARRAY(type, name, arraySize) { for (int arrayIndex = 0; arrayIndex < arraySize; arrayIndex++) { name[arrayIndex] = (type)0; } }
+
+	// Texture util abstraction
+
+	#define CALCULATE_TEXTURE2D_LOD(textureName, samplerName, coord2) textureName.CalculateLevelOfDetail(samplerName, coord2)
+
+	// Texture abstraction
+
+	#define TEXTURE2D(textureName)                  Texture2D textureName
+	#define TEXTURE2D_ARRAY(textureName)            Texture2DArray textureName
+
+	#define TEXTURE2D_FLOAT(textureName)            Texture2D_float textureName
+	#define TEXTURE2D_ARRAY_FLOAT(textureName)      Texture2DArray textureName    // no support to _float on Array, it's being added
+
+	#define TEXTURE2D_HALF(textureName)             Texture2D_half textureName
+	#define TEXTURE2D_ARRAY_HALF(textureName)       Texture2DArray textureName    // no support to _float on Array, it's being added
+
+	#define SAMPLER(samplerName)                    SamplerState samplerName
+	#define SAMPLER_CMP(samplerName)                SamplerComparisonState samplerName
+
+	#define SAMPLE_TEXTURE2D(textureName, samplerName, coord2)                               textureName.Sample(samplerName, coord2)
+	#define SAMPLE_TEXTURE2D_LOD(textureName, samplerName, coord2, lod)                      textureName.SampleLevel(samplerName, coord2, lod)
+	#define SAMPLE_TEXTURE2D_BIAS(textureName, samplerName, coord2, bias)                    textureName.SampleBias(samplerName, coord2, bias)
+	#define SAMPLE_TEXTURE2D_GRAD(textureName, samplerName, coord2, ddx, ddy)                textureName.SampleGrad(samplerName, coord2, ddx, ddy)
+	#define SAMPLE_TEXTURE2D_ARRAY(textureName, samplerName, coord2, index)                  textureName.Sample(samplerName, float3(coord2, index))
+	#define SAMPLE_TEXTURE2D_ARRAY_LOD(textureName, samplerName, coord2, index, lod)         textureName.SampleLevel(samplerName, float3(coord2, index), lod)
+	#define SAMPLE_TEXTURE2D_ARRAY_BIAS(textureName, samplerName, coord2, index, bias)       textureName.SampleBias(samplerName, float3(coord2, index), bias)
+	#define SAMPLE_TEXTURE2D_ARRAY_GRAD(textureName, samplerName, coord2, index, dpdx, dpdy) textureName.SampleGrad(samplerName, float3(coord2, index), dpdx, dpdy)
+
+#elif defined(SHADER_API_GLES)
+
+
+	#define uint int
+
+	#define rcp(x) 1.0 / (x)
+	#define ddx_fine ddx
+	#define ddy_fine ddy
+	#define asfloat
+	#define asuint(x) asint(x)
+	#define f32tof16
+	#define f16tof32
+
+	#define ERROR_ON_UNSUPPORTED_FUNCTION(funcName) #error #funcName is not supported on GLES 2.0
+
+	// Initialize arbitrary structure with zero values.
+	// Do not exist on some platform, in this case we need to have a standard name that call a function that will initialize all parameters to 0
+	#define ZERO_INITIALIZE(type, name) name = (type)0;
+	#define ZERO_INITIALIZE_ARRAY(type, name, arraySize) { for (int arrayIndex = 0; arrayIndex < arraySize; arrayIndex++) { name[arrayIndex] = (type)0; } }
+
+
+	// Texture util abstraction
+
+	#define CALCULATE_TEXTURE2D_LOD(textureName, samplerName, coord2) #error calculate Level of Detail not supported in GLES2
+
+	// Texture abstraction
+
+	#define TEXTURE2D(textureName)                          sampler2D textureName
+	#define TEXTURE2D_ARRAY(textureName)                    samplerCUBE textureName // No support to texture2DArray
+	#define TEXTURECUBE(textureName)                        samplerCUBE textureName
+	#define TEXTURECUBE_ARRAY(textureName)                  samplerCUBE textureName // No supoport to textureCubeArray and can't emulate with texture2DArray
+	#define TEXTURE3D(textureName)                          sampler3D textureName
+
+	#define TEXTURE2D_FLOAT(textureName)                    sampler2D_float textureName
+	#define TEXTURECUBE_FLOAT(textureName)                  samplerCUBE_float textureName
+	#define TEXTURE2D_ARRAY_FLOAT(textureName)              TEXTURECUBE_FLOAT(textureName) // No support to texture2DArray
+
+	#define TEXTURE2D_HALF(textureName)                     sampler2D_half textureName
+	#define TEXTURE2D_ARRAY_HALF(textureName)               TEXTURECUBE_HALF(textureName) // No support to texture2DArray
+	
+	#define SAMPLER(samplerName)
+	#define SAMPLER_CMP(samplerName)
+
+	#define SAMPLE_TEXTURE2D(textureName, samplerName, coord2) tex2D(textureName, coord2)
+
+	#if (SHADER_TARGET >= 30)
+	    #define SAMPLE_TEXTURE2D_LOD(textureName, samplerName, coord2, lod) tex2Dlod(textureName, float4(coord2, 0, lod))
+	#else
+	    // No lod support. Very poor approximation with bias.
+	    #define SAMPLE_TEXTURE2D_LOD(textureName, samplerName, coord2, lod) SAMPLE_TEXTURE2D_BIAS(textureName, samplerName, coord2, lod)
+	#endif
+
+	#define SAMPLE_TEXTURE2D_BIAS(textureName, samplerName, coord2, bias)                       tex2Dbias(textureName, float4(coord2, 0, bias))
+	#define SAMPLE_TEXTURE2D_GRAD(textureName, samplerName, coord2, ddx, ddy)                   SAMPLE_TEXTURE2D(textureName, samplerName, coord2)
+	#define SAMPLE_TEXTURE2D_ARRAY(textureName, samplerName, coord2, index)                     ERROR_ON_UNSUPPORTED_FUNCTION(SAMPLE_TEXTURE2D_ARRAY)
+	#define SAMPLE_TEXTURE2D_ARRAY_LOD(textureName, samplerName, coord2, index, lod)            ERROR_ON_UNSUPPORTED_FUNCTION(SAMPLE_TEXTURE2D_ARRAY_LOD)
+	#define SAMPLE_TEXTURE2D_ARRAY_BIAS(textureName, samplerName, coord2, index, bias)          ERROR_ON_UNSUPPORTED_FUNCTION(SAMPLE_TEXTURE2D_ARRAY_BIAS)
+	#define SAMPLE_TEXTURE2D_ARRAY_GRAD(textureName, samplerName, coord2, index, dpdx, dpdy)    ERROR_ON_UNSUPPORTED_FUNCTION(SAMPLE_TEXTURE2D_ARRAY_GRAD)
+
+
+#else
+#error unsupported shader api
+#endif
+
+
+
+
+// default flow control attributes
+#ifndef UNITY_BRANCH
+#   define UNITY_BRANCH
+#endif
+#ifndef UNITY_FLATTEN
+#   define UNITY_FLATTEN
+#endif
+#ifndef UNITY_UNROLL
+#   define UNITY_UNROLL
+#endif
+#ifndef UNITY_UNROLLX
+#   define UNITY_UNROLLX(_x)
+#endif
+#ifndef UNITY_LOOP
+#   define UNITY_LOOP
+#endif
+
+

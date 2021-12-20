@@ -1,0 +1,109 @@
+﻿
+#pragma kernel Compute
+
+
+//Input vars
+float _focalLength;
+float _farPlane;
+float _nearPlane;
+float _maxDistThreshold;
+
+Texture2D<float> _DepthTex;
+int _DepthWidth;
+int _DepthHeight;
+
+float4x4 _Transform;
+
+float4x4 _World2ROI;
+
+//Output vars
+RWStructuredBuffer<float3> vertices;
+RWStructuredBuffer<float2> uv;
+RWStructuredBuffer<int> triangles;
+
+[numthreads(32, 32, 1)]
+void Compute(uint3 id : SV_DispatchThreadID) {
+
+	int x = id.x;
+	int y = id.y;
+
+	int idx = x + _DepthWidth * y;
+	int idxx = idx * 6;
+
+	int x0 = x - 1;
+	if (x0 < 0) x0 = 0;
+
+	int x1 = x + 1;
+	if (x1 >= _DepthWidth) x1 = _DepthWidth - 1;
+
+	int y0 = y - 1;
+	if (y0 < 0) y0 = 0;
+
+	int y1 = y + 1;
+	if (y1 >= _DepthHeight) y1 = _DepthHeight - 1;
+
+	// Get Depth of surrounding pixels
+	float depth00 = _DepthTex.Load(int3(x0, y0, 0));
+	float depth01 = _DepthTex.Load(int3(x0, y, 0));
+	float depth02 = _DepthTex.Load(int3(x0, y1, 0));
+
+	float depth10 = _DepthTex.Load(int3(x , y0, 0));
+	float depth11 = _DepthTex.Load(int3(x , y, 0));
+	float depth12 = _DepthTex.Load(int3(x , y1, 0));
+
+	float depth20 = _DepthTex.Load(int3(x1, y0, 0));
+	float depth21 = _DepthTex.Load(int3(x1, y, 0));
+	float depth22 = _DepthTex.Load(int3(x1, y1, 0));
+
+	float clippingPlaneDistance = _farPlane - _nearPlane;
+
+	// Compute 3D points of the depth pixels
+	float4 pos00 = float4(float3((x0 - _DepthWidth * 0.5f) / _focalLength, (y0 - _DepthHeight * 0.5f) / _focalLength, 1) * (depth00 * clippingPlaneDistance + _nearPlane), 1);
+	float4 pos01 = float4(float3((x0 - _DepthWidth * 0.5f) / _focalLength, (y - _DepthHeight * 0.5f) / _focalLength, 1) * (depth01 * clippingPlaneDistance + _nearPlane), 1);
+	float4 pos02 = float4(float3((x0 - _DepthWidth * 0.5f) / _focalLength, (y1 - _DepthHeight * 0.5f) / _focalLength, 1) * (depth02 * clippingPlaneDistance + _nearPlane), 1);
+	
+	float4 pos10 = float4(float3((x - _DepthWidth * 0.5f) / _focalLength, (y0 - _DepthHeight * 0.5f) / _focalLength, 1) * (depth10 * clippingPlaneDistance + _nearPlane), 1);
+	float4 pos11 = float4(float3((x - _DepthWidth * 0.5f) / _focalLength, (y - _DepthHeight * 0.5f) / _focalLength, 1) * (depth11 * clippingPlaneDistance + _nearPlane), 1);
+	float4 pos12 = float4(float3((x  - _DepthWidth * 0.5f) / _focalLength, (y1 - _DepthHeight * 0.5f) / _focalLength, 1) * (depth12 * clippingPlaneDistance + _nearPlane), 1);
+
+	float4 pos20 = float4(float3((x1 - _DepthWidth * 0.5f) / _focalLength, (y0 - _DepthHeight * 0.5f) / _focalLength, 1) * (depth20 * clippingPlaneDistance + _nearPlane), 1);
+	float4 pos21 = float4(float3((x1 - _DepthWidth * 0.5f) / _focalLength, (y - _DepthHeight * 0.5f) / _focalLength, 1) * (depth21 * clippingPlaneDistance + _nearPlane), 1);
+	float4 pos22 = float4(float3((x1 - _DepthWidth * 0.5f) / _focalLength, (y1 - _DepthHeight * 0.5f) / _focalLength, 1) * (depth22 * clippingPlaneDistance + _nearPlane), 1);
+	
+	float4 p = mul(_Transform, pos11);
+	vertices[idx] = p;
+
+	uv[idx] = float2(1.0f * x / _DepthWidth, 1.0f * y / _DepthHeight);
+
+	float4 pInRoi = mul(_World2ROI, p);
+
+	// Create triangles when distance between center point and neighbouring point is within the depth threshold. Also, discards points outside the ROI
+	// Discared triangles are marked with -1 and will be filtered out when exporting.
+	if (pInRoi.x < -0.55f || pInRoi.x > 0.55f || pInRoi.y < -0.55f || pInRoi.y > 0.55f || pInRoi.z < -0.55f || pInRoi.z > 0.55f ||
+		distance(pos11, pos00) > _maxDistThreshold || distance(pos11, pos01) > _maxDistThreshold || distance(pos11, pos02) > _maxDistThreshold ||
+		distance(pos11, pos10) > _maxDistThreshold                                               || distance(pos11, pos12) > _maxDistThreshold ||
+		distance(pos11, pos20) > _maxDistThreshold || distance(pos11, pos21) > _maxDistThreshold || distance(pos11, pos22) > _maxDistThreshold ||
+		depth00 > 0.98f || depth01 > 0.98f || depth02 > 0.98f || 
+		depth10 > 0.98f || depth11 > 0.98f || depth12 > 0.98f || 
+		depth20 > 0.98f || depth21 > 0.98f || depth22 > 0.98f)
+	{
+		triangles[idxx++] = -1;
+		triangles[idxx++] = -1;
+		triangles[idxx++] = -1;
+
+		triangles[idxx++] = -1;
+		triangles[idxx++] = -1;
+		triangles[idxx++] = -1;
+	}
+	else
+	{
+		triangles[idxx++] = x0 + _DepthWidth * y0;
+		triangles[idxx++] = x0 + _DepthWidth * y1;
+		triangles[idxx++] = x1 + _DepthWidth * y0;
+
+		triangles[idxx++] = x1 + _DepthWidth * y0;
+		triangles[idxx++] = x0 + _DepthWidth * y1;
+		triangles[idxx++] = x1 + _DepthWidth * y1;
+	}
+
+}
