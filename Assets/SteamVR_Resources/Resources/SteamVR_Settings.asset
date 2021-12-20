@@ -24,8 +24,8 @@ MonoBehaviour:
   autoEnableVR: 1
   legacyMixedRealityCamera: 1
   mixedRealityCameraPose:
-    actionPath: /actions/Magnorama_Input/in/Pose
-    needsReinit: 0
+    actionPath: 
+    needsReinit: 1
   mixedRealityCameraInputSource: 11
   mixedRealityActionSetAutoEnable: 1
   previewHandLeft: {fileID: 1000013348574242, guid: 638779290bce1af49b356f33dcc6fccf,
