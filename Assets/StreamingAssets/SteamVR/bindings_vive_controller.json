@@ -235,6 +235,10 @@
                   }
                },
                "mode" : "button",
+               "parameters" : {
+                  "click_activate_threshold" : "0.9",
+                  "click_deactivate_threshold" : "0.5"
+               },
                "path" : "/user/hand/left/input/trigger"
             },
             {
@@ -244,6 +248,10 @@
                   }
                },
                "mode" : "button",
+               "parameters" : {
+                  "click_activate_threshold" : "0.9",
+                  "click_deactivate_threshold" : "0.5"
+               },
                "path" : "/user/hand/right/input/trigger"
             },
             {

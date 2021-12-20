@@ -6,7 +6,8 @@ using UnityEngine.Events;
 
 public class VRButton : MonoBehaviour
 {
-    
+
+    public bool GazeTriggered = false;
     public float ClickDuration = 1;
 
     public UnityEvent OnClickEvent;
@@ -16,8 +17,9 @@ public class VRButton : MonoBehaviour
 
     private GameObject Circle;
     private Mesh CircleMesh;
-    private float outerRadius = 0.02f;
-    private float innerRadius = 0.01f;
+    [Header("Circle Indicator")]
+    public float outerRadius = 0.02f;
+    public float innerRadius = 0.01f;
 
     private bool _isInsidePrevFrame = false;
     private void Start()
@@ -32,9 +34,10 @@ public class VRButton : MonoBehaviour
     {
         while(true)
         {
-            if (IsInside(ControllerManager.PositionLeft) || IsInside(ControllerManager.PositionRight))
+
+            if (GazeTrigger() || IsInside(ControllerManager.PositionLeft) || IsInside(ControllerManager.PositionRight))
             {
-                if(!_isInsidePrevFrame)
+                if (!_isInsidePrevFrame)
                 {
                     _isInsidePrevFrame = true;
                     if (OnEnterEvent != null) OnEnterEvent.Invoke();
@@ -65,7 +68,7 @@ public class VRButton : MonoBehaviour
             }
             else
             {
-                if(_isInsidePrevFrame)
+                if (_isInsidePrevFrame)
                 {
                     _isInsidePrevFrame = false;
                     if (OnExitEvent != null) OnExitEvent.Invoke();
@@ -79,6 +82,19 @@ public class VRButton : MonoBehaviour
         }
     }
 
+    private bool GazeTrigger()
+    {
+        if (!GazeTriggered) return false;
+
+        if(Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out var hit, 3))
+        {
+            if(hit.collider.transform == transform)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
     private bool IsInside(Vector3 pos)
     {
         Vector3 localPos = transform.InverseTransformPoint(pos);

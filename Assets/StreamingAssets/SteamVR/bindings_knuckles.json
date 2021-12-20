@@ -290,6 +290,11 @@
                   }
                },
                "mode" : "button",
+               "parameters" : {
+                  "click_activate_threshold" : "0.95",
+                  "click_deactivate_threshold" : "0.5",
+                  "force_input" : ""
+               },
                "path" : "/user/hand/left/input/grip"
             },
             {
@@ -299,6 +304,11 @@
                   }
                },
                "mode" : "button",
+               "parameters" : {
+                  "click_activate_threshold" : "0.95",
+                  "click_deactivate_threshold" : "0.5",
+                  "force_input" : ""
+               },
                "path" : "/user/hand/right/input/grip"
             }
          ]
