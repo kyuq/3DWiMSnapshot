@@ -131,7 +131,7 @@ namespace Magnorama
                     var newPadValue = ControllerManager.PadRightTouch2D;
                     if (PreviousScalePadValue == null) PreviousScalePadValue = newPadValue;
 
-                    var angle = Vector2.SignedAngle(PreviousScalePadValue.Value, newPadValue);
+                    var angle = -Vector2.SignedAngle(PreviousScalePadValue.Value, newPadValue);
 
                     ControllerManager.RightVibrate(0.01f, 1, Mathf.Abs(angle * 0.005f));
 
