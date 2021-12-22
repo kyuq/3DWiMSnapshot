@@ -12,9 +12,8 @@ public class Snapshot3DUI_Main : Mag_Controller
         "This is currently only enabled for few frames for taking snapshots")]
     public bool RenderAllCameras = false;
 
-    [Tooltip("A value greater than 0 overrides all automatic depth thresholds to prevent artefacts in the point cloud rendering")]
-    public float OverrideDistanceThreshold = -1f;
-    private float maxDistanceThresholdDepth = 0.03f;
+    [Tooltip("Threshold in meters for connecting neighbored vertices to triangles when assuming a ROI size of 1x1x1 meters.")]
+    public float DistanceThreshold = 0.05f;
 
     // Views onto the region of interest. Only normal view is enabled for every frame.
     private Mag_RGBD NormalMiddleView;
@@ -207,23 +206,16 @@ public class Snapshot3DUI_Main : Mag_Controller
         // Thresholding is done on original scale and done before scaling for WiM
         // When the ROI is large, the depth threshold should grow as well since distances between pixels increase.
         // The threshold can not be set abitrarly large since then unwanted triangles will be connected.
-        if (OverrideDistanceThreshold > 0.001f)
-        {
-            maxDistanceThresholdDepth = OverrideDistanceThreshold * ROI.Instance.Scale;
-        }
-        else
-        {
-            maxDistanceThresholdDepth = 0.02f * ROI.Instance.Scale;
-        }
+        var adjustedDepthThreshold = DistanceThreshold * ROI.Instance.Scale;
 
 
-        NormalMiddleView.maxDistanceThresholdDepth = maxDistanceThresholdDepth;
-        FrontView.maxDistanceThresholdDepth = maxDistanceThresholdDepth;
-        LeftView.maxDistanceThresholdDepth = maxDistanceThresholdDepth;
-        RightView.maxDistanceThresholdDepth = maxDistanceThresholdDepth;
-        BehindView.maxDistanceThresholdDepth = maxDistanceThresholdDepth;
-        TopView.maxDistanceThresholdDepth = maxDistanceThresholdDepth;
-        BottomView.maxDistanceThresholdDepth = maxDistanceThresholdDepth;
+        NormalMiddleView.maxDistanceThresholdDepth = adjustedDepthThreshold;
+        FrontView.maxDistanceThresholdDepth = adjustedDepthThreshold;
+        LeftView.maxDistanceThresholdDepth = adjustedDepthThreshold;
+        RightView.maxDistanceThresholdDepth = adjustedDepthThreshold;
+        BehindView.maxDistanceThresholdDepth = adjustedDepthThreshold;
+        TopView.maxDistanceThresholdDepth = adjustedDepthThreshold;
+        BottomView.maxDistanceThresholdDepth = adjustedDepthThreshold;
 
         // Render and update rendering inside the WiM
         NormalMiddleView.Update();

@@ -118,7 +118,7 @@ namespace Magnorama
 
                 Matrix4x4 World2ClipCam = Matrix4x4.identity;
 
-                var CamPosition = Matrix4x4.TRS(new Vector3(0, 0, -ROI.Instance.Scale * 1.5f), Quaternion.identity, Vector3.one);
+                var CamPosition = Matrix4x4.TRS(new Vector3(0, 0, -ROI.Instance.Scale * 1.15f), Quaternion.identity, Vector3.one);
 
                 // Adjust camera pose depending on the selected configuration
                 switch (ViewPoint)
