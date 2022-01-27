@@ -3,8 +3,8 @@ Submitted to IEEE VR 2022 3DUI Contest (https://ieeevr.org/2022/contribute/3dui-
 
 ## Abstract
 <img align="right" width="200" src="image_snapshot.jpg">
-Immersive Virtual Reality can be a memorable medium for story-telling and artistic expression. Taking snapshots of Virtual Reality applications are commonly only possible by taking a two dimensional screenshot on a tethered PC. We propose to capture 3D snapshots using the interaction technique World-In-Miniature to create three-dimensional diorama snapshots that can be exported and viewed outside the application.<br/>
-We present a method for generating the duplication of the World-In-Miniature view using a virtual RGB-D camera. Furthermore, we include and describe a navigation method with both a region of interest and its duplication within the World-In-Miniature.
+Immersive Virtual Reality can be a memorable medium for story-telling and artistic expression. However, taking snapshots of VR applications is commonly only possible by taking a two-dimensional screenshot on a tethered PC. We capture 3D snapshots using the interaction technique World-In-Miniature (WiM) by using virtual RGB-D cameras to create three-dimensional snapshots that can be exported and viewed outside the application.<br/>
+We integrate a novel interaction method to fine-tune the content shown inside the WiM with VR controllers. 
 
 ## Features
 This project uses the principle of World-In-Miniature for Spatial Exploration, fine-adjustment of pose and scale of the region on interest, and creating 3D snapshots. Latter can be stored into .obj Wavefront files with exported textures.
