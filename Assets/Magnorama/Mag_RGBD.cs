@@ -185,8 +185,9 @@ namespace Magnorama
                 _ub.GetData(uv);
                 _ib.GetData(indices);
 
-                var roiCenter = ROI.Instance.transform.position;
-                m.vertices = vertices.Select(x => x - roiCenter).ToArray();
+                var roiTransform = ROI.Instance.transform;
+                var roiMat = Matrix4x4.TRS(roiTransform.position, roiTransform.rotation, Vector3.one).inverse;
+                m.vertices = vertices.Select(x => roiMat.MultiplyPoint(x)).ToArray();
                 m.uv = uv;
                 indices = indices.Where(x => x > -1).ToArray();
 
