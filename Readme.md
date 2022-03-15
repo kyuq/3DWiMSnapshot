@@ -67,7 +67,7 @@ Cite us!
 }
 ```
 
-You may be interest for our related work:
+You may be interested in our related work:
 
 ```
 @article{yu2022duplicated,
