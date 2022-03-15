@@ -1,5 +1,6 @@
 # Spatial Exploration with a WiM for Capturing 3D Dioramic Snapshots
-Submitted to IEEE VR 2022 3DUI Contest (https://ieeevr.org/2022/contribute/3dui-contest/)
+Submitted and accepted to the IEEE VR 2022 3DUI Contest (https://ieeevr.org/2022/contribute/3dui-contest/)
+You can find the demo executable for the conference here: https://docs.google.com/presentation/d/1uXK1lr8Uz53kP6QKXu8H1L-fJjVvjcBoEIG3aYj7INo/edit?usp=sharing
 
 ## Abstract
 <img align="right" width="200" src="image_snapshot.jpg">
