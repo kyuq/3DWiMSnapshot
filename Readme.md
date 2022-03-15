@@ -55,6 +55,41 @@ and miscellaneous models:
 and sound effects from https://freesound.org/home/
 
 ________________________________________________________________________________________________________________
+Cite us!
+```
+@article{yu2022spatial,
+  title={Spatial Exploration with a WiM for Capturing 3D Dioramic Snapshots},
+  author={Yu, Kevin and Eck, Ulrich and Navab, Nassir},
+  booktitle={2022 IEEE Virtual Reality and 3D User Interfaces (VR), 3DUI Contest},
+  organization={IEEE}
+}
+```
+
+You may be interest for our related work:
+
+```
+@article{yu2022duplicated,
+  title={Duplicated Reality for Co-located Augmented Reality Collaboration},
+  author={Yu, Kevin and Eck, Ulrich and Pankratz, Frieder and Lazarovici, Marc and Wilhelm, Dirk and Navab, Nassir},
+  journal={IEEE Transactions on Visualization \& Computer Graphics},
+  number={01},
+  pages={1--1},
+  year={2022},
+  publisher={IEEE Computer Society}
+}
+```
+
+```
+@inproceedings{yu2021magnoramas,
+  title={Magnoramas: Magnifying Dioramas for Precise Annotations in Asymmetric 3D Teleconsultation},
+  author={Yu, Kevin and Winkler, Alexander and Pankratz, Frieder and Lazarovici, Marc and Wilhelm, Dirk and Eck, Ulrich and Roth, Daniel and Navab, Nassir},
+  booktitle={2021 IEEE Virtual Reality and 3D User Interfaces (VR)},
+  pages={392--401},
+  year={2021},
+  organization={IEEE}
+}
+```
+________________________________________________________________________________________________________________
 Copyright 2022 Kevin Yu
 
 This program is free software; you can redistribute it and/or
