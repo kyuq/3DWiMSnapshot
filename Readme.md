@@ -2,6 +2,8 @@
 Submitted and accepted to the IEEE VR 2022 3DUI Contest (https://ieeevr.org/2022/contribute/3dui-contest/)<br/>
 You can find the demo executable for the conference here:<br/>
 https://docs.google.com/presentation/d/1uXK1lr8Uz53kP6QKXu8H1L-fJjVvjcBoEIG3aYj7INo/edit?usp=sharing
+and a video of the 3DUI contest entry here:
+https://drive.google.com/file/d/1U9En_WwCrlLCeF-7Y-DDuxfvSm65dc-f/view?usp=sharing
 
 ## Abstract
 <img align="right" width="200" src="image_snapshot.jpg">
